@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace libs\laudirbispo\FileAndFolder;
+namespace laudirbispo\FileAndFolder;
 
 /**
  * Copyright (c) Laudir Bispo  (laudirbispo@outlook.com)
