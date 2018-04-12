@@ -1,0 +1,22 @@
+{
+    "name": "laudirbispo/filefolder",
+    "description": "File and Folder handler classes.",
+    "keywords": ["File", "Folder"],
+    "type": "library",
+	"version": "1.0.1",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laudir Bispo",
+            "email": "laudirbispo@outlook.com",
+            "homepage": "https://www.facebook.com/laudirbispo"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {"laudirbispo\\FileAndFolder\\": "src/FileAndFolder"}
+    }
+
+}
