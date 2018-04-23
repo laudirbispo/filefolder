@@ -67,7 +67,7 @@ class Folder
 	/**
 	 * Create directorys
 	 */
-	public static function create (string $path, int $mode = self::DEFAULT_MODE) : bool
+	public static function create (string $path, int $mode = self::DEFAULT_MODE, bool $recursive = true) : bool
 	{
 		$path = self::normalize($path);
 		
@@ -75,7 +75,7 @@ class Folder
 			return true;
 
 		$oldumask = umask(0);
-		$dir = mkdir($path, $mode); 
+		$dir = mkdir($path, $mode, $recursive); 
 		umask($oldumask); 
 		return $dir;
 	}
