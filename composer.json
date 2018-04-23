@@ -3,7 +3,7 @@
     "description": "File and Folder handler classes.",
     "keywords": ["File", "Folder"],
     "type": "library",
-	"version": "1.0.1",
+	"version": "1.0.2",
     "license": "MIT",
     "authors": [
         {
