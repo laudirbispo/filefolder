@@ -68,8 +68,8 @@ trait TraitFileAndFolder
 	public static function slugify($string) : string
 	{
 		if (!is_string($string))
-			return $string;
-		
+			throw new \InvalidArgumentException("slugify(), deve receber uma string como parâmetro.");
+        
 		$string = preg_replace('/[\t\n]/', ' ', $string);
 		$string = preg_replace('/\s{2,}/', ' ', $string);
 		$list = array(
