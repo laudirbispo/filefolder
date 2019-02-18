@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 namespace laudirbispo\FileAndFolder;
-
 /**
  * Copyright (c) Laudir Bispo  (laudirbispo@outlook.com)
  *
@@ -9,7 +8,7 @@ namespace laudirbispo\FileAndFolder;
  * Redistributions of files must retain the above copyright notice.
  *
  * @copyright     (c) Laudir Bispo  (laudirbispo@outlook.com)
- * @since         1.0.0
+ * @since         2016
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
@@ -61,7 +60,7 @@ class File
 	
 	public $errors = [];
 	
-	public function __construct (string $file = '')
+	public function __construct(string $file = '')
 	{
 		$this->file = self::normalize($file);
 		if (empty($this->mime_types))
@@ -71,7 +70,7 @@ class File
 	/**
 	 * Sets a new file for analize
 	 */
-	public function setFile (string $file = '')
+	public function setFile(string $file = '')
 	{
 		$this->file = self::normalize($file);
 		return $this;
@@ -80,7 +79,7 @@ class File
 	/**
 	 * check if file exists
 	 */
-	public function exists () : bool
+	public function exists()
 	{
 		return (file_exists($this->file) && is_file($this->file));
 	}
@@ -90,7 +89,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function extension ()
+	public function extension()
 	{
 		return pathinfo($this->file, PATHINFO_EXTENSION);
 	}
@@ -100,7 +99,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function dirname ()
+	public function dirname()
 	{
 		return pathinfo($this->file, PATHINFO_DIRNAME);
 	}
@@ -110,7 +109,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function basename ()
+	public function basename()
 	{
 		return pathinfo($this->file, PATHINFO_BASENAME);
 	}
@@ -120,7 +119,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function name ()
+	public function name()
 	{
 		return pathinfo($this->file, PATHINFO_FILENAME);
 	}
@@ -130,7 +129,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function humanSize ()
+	public function humanSize()
 	{
 		return self::convertSizeToHumans($this->size());
 	}
@@ -140,7 +139,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function setPrefix (string $prefix = '')
+	public function setPrefix(string $prefix = '')
 	{
 		$this->prefix = $prefix;
 		return $this;
@@ -151,7 +150,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function getPrefix ()
+	public function getPrefix()
 	{
 		return $this->prefix;
 	}
@@ -161,7 +160,7 @@ class File
      *
      * @return bool True if it's executable, false otherwise
      */
-    public function isExecutable () : bool
+    public function isExecutable() : bool
     {
         return is_executable($this->file);
     }
@@ -171,7 +170,7 @@ class File
      *
      * @return bool True if file is readable, false otherwise
      */
-    public function isReadable () : bool
+    public function isReadable() : bool
     {
         return is_readable($this->file);
     }
@@ -179,23 +178,21 @@ class File
 	/**
 	 * Returns true if the file exists and can be modified
 	 */
-	public function isWritable () : bool
+	public function isWritable() : bool
 	{
-		return is_writable($this->getDirname());
+		return is_writable($this->dirname());
 	}
 
 	
 	/**
 	 * Get file informations
 	 */
-	public function getInfo ()
+	public function getInfo()
 	{
-		if (!$this->exists())
-		{
+		if (!$this->exists()) {
 			$this->errors[] = sprintf("O arquivo [%s] não existe.", $this->file);
-			//return $info[] = '';
+			return [];
 		}
-		
 		$info = pathinfo($this->file);
 		$info['mime_type'] = $this->mimeType();
 		$info['size'] = $this->size();
@@ -213,7 +210,7 @@ class File
 	 *
 	 * @return (mixed) - The value or NULL
 	 */
-	public function mimeType ()
+	public function mimeType()
 	{
 		if ($this->exists()) 
 			return mime_content_type($this->file);
@@ -225,7 +222,7 @@ class File
      *
      * @return string|null The file group, or null in case of an error
      */
-    public function group ()
+    public function group()
     {
         if ($this->exists()) 
             return filegroup($this->file);
@@ -237,7 +234,7 @@ class File
      *
      * @return int|null Timestamp of last access time, or null in case of an error
      */
-    public function lastAccess ()
+    public function lastAccess()
     {
         if ($this->exists()) 
             return fileatime($this->file);
@@ -249,7 +246,7 @@ class File
      *
      * @return int|null Timestamp of last modification, or null in case of an error
      */
-    public function lastChange ()
+    public function lastChange()
     {
         if ($this->exists()) 
             return filemtime($this->file);
@@ -261,7 +258,7 @@ class File
      *
      * @return string|null The file owner, or null in case of an error
      */
-    public function owner ()
+    public function owner()
     {
         if ($this->exists()) 
             return fileowner($this->file);
@@ -273,7 +270,7 @@ class File
      *
      * @return string|false Permissions for the file, or false in case of an error
      */
-    public function permissions ()
+    public function permissions()
     {
         if ($this->exists()) 
             return substr(sprintf('%o', fileperms($this->file)), -4);
@@ -284,18 +281,13 @@ class File
 	/**
 	 * Returns the full size of file
 	 */
-	public function size () 
+	public function size() 
 	{
-		if (!$this->exists())
-		{
+		if (!$this->exists()){
 			$size = null;
-		}
-		else if (!(strtoupper(substr(PHP_OS, 0, 3)) == 'WIN')) 
-		{
+		} else if (!(strtoupper(substr(PHP_OS, 0, 3)) == 'WIN')) {
 			$size = trim(`stat -c%s $this->file`);
-		}
-		else
-		{
+		} else {
 			$fsobj = new \COM("Scripting.FileSystemObject");
 			$f = $fsobj->GetFile($this->file);
 			$size = $f->Size;
@@ -309,11 +301,10 @@ class File
 	 *
 	 * @param $new_name (mixed) - case null, automatically generates the name
 	 */
-	public function rename ($new_name = null)
+	public function rename($new_name = null)
 	{
 	
-		if (!$this->exists())
-		{
+		if (!$this->exists()){
 			$this->erros[] = sprintf("Não foi possível renomear o arquivo [%s] porque ele não existe!", $this->file);
 			return false;
  		}
@@ -337,11 +328,21 @@ class File
 
 		return false;	
 	}
+    
+    /**
+     * Sets the permissions on the specified file
+     *
+     * @param $mode - The new permissions, given as an octal value.
+     */
+    public function setChmod($mode = 0644) : bool 
+    {
+        return chmod($this->file, $mode);
+    }
 	
 	/**
 	 * Checks whether the file is valid, according to the extension and MIME type
 	 */
-	public function isValidMime () : bool
+	public function isValidMime() : bool
 	{
 		$ext = $this->extension();
 		$mime = $this->mimeType();
@@ -362,12 +363,16 @@ class File
 	
 	/** 
 	 * Creates a new file
-	 */
-	public function create()
+	 *
+     * @param $mode - The new permissions, given as an octal value.
+     */
+	public function create($mode = 0644)
 	{
-		if (!$this->exists())
-			fopen($this->file, "a");
-		
+		if (!$this->exists()) {
+            fopen($this->file, "a");
+            $this->setChmod($mode);
+        }
+			
 		if (touch($this->file)) 
             return true;
 		else
@@ -437,7 +442,7 @@ class File
      * @param int $seek PHP Constant SEEK_SET | SEEK_CUR | SEEK_END determining what the $offset is relative to
      * @return int|bool True on success, false on failure (set mode), false on failure or integer offset on success (get mode)
      */
-    public function offset ($offset = false, $seek = SEEK_SET)
+    public function offset($offset = false, $seek = SEEK_SET)
     {
         if ($offset === false) 
 		{
@@ -460,7 +465,7 @@ class File
      * @param bool $force Force the file to open
      * @return bool Success
      */
-    public function write ($data, $mode = 'w', $force = false)
+    public function write($data, $mode = 'w', $force = false)
     {
         $success = false;
         if ($this->open($mode, $force) === true) 
@@ -483,7 +488,7 @@ class File
      *
      * @return bool True if closing was successful or file was already closed, otherwise false
      */
-    public function close ()
+    public function close()
     {
         if (!is_resource($this->handle)) {
             return true;
@@ -498,7 +503,7 @@ class File
      * @param bool $force Force the file to open
      * @return bool Success
      */
-    public function append ($data, $force = false)
+    public function append($data, $force = false)
     {
         return $this->write($data, 'a', $force);
     }
@@ -510,7 +515,7 @@ class File
      * @param string|array $replace Text(s) to replace with.
      * @return bool Success
      */
-    public function replaceText ($search, $replace)
+    public function replaceText($search, $replace)
     {
         if (!$this->open('r+')) 
             return false;
@@ -536,7 +541,7 @@ class File
      * @param bool $force_windows If true forces Windows new line string.
      * @return string The with converted line endings.
      */
-    public static function prepare ($data, $force_windows = false)
+    public static function prepare($data, $force_windows = false)
     {
         $lineBreak = "\n";
         if (DIRECTORY_SEPARATOR === '\\' || $force_windows === true) 
@@ -548,7 +553,7 @@ class File
 	/**
 	 * Clear contents of file
 	 */
-	public function clear ()
+	public function clear()
 	{
 		return $this->write('');
 	}
@@ -558,10 +563,9 @@ class File
      *
      * @return bool 
      */
-    public function delete ()
+    public function delete() : bool
     {
-        if (is_resource($this->handle)) 
-		{
+        if (is_resource($this->handle)) {
             fclose($this->handle);
             $this->handle = null;
         }
@@ -569,6 +573,16 @@ class File
             return unlink($this->file);
         
         return false;
+    }
+    
+    public function hasErrors() : bool 
+    {
+        return (count($this->errors) > 1) ? true : false;
+    }
+    
+    public function getErrors() : array 
+    {
+        return $this->errors;
     }
 	
 }

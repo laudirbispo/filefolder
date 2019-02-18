@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 namespace laudirbispo\FileAndFolder;
-
 /**
  * Copyright (c) Laudir Bispo  (laudirbispo@outlook.com)
  *
@@ -9,7 +8,7 @@ namespace laudirbispo\FileAndFolder;
  * Redistributions of files must retain the above copyright notice.
  *
  * @copyright     (c) Laudir Bispo  (laudirbispo@outlook.com)
- * @since         1.0.0
+ * @since         2016
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
@@ -34,42 +33,42 @@ class Folder
      *
      * @var int (octal)
      */
-    const DEFAULT_MODE = 0755;
+    const DEFAULT_MODE = 0644;
 	
-	public static $errors = array();
+	public $errors = [];
 	
-	public static $messages = array();
+	public $messages = [];
 	
-	public function __construct($path = null, $create = false, $mode = false)
+	public function __construct(?string $path = null)
     {
-		//...
+		$this->path = self::normalize($path);
     }
 	
 	/**
 	 * Check if the current path exists
 	 */
-	public static function exists (string $path) : bool
+	public function exists() : bool
 	{
-		return (file_exists($path));
+		return (file_exists($this->path));
 	}
 	
 	/**
 	 * Returns true if the file exists and can be modified
 	 */
-	public static function isWritable (string $path) : bool
+	public function isWritable() : bool
 	{
-		if (!self::exists($path))
+		if (!self::exists($this->path))
 			return false;
 		
-		return (is_writable($path));
+		return (is_writable($this->path));
 	}
 	
 	/**
 	 * Create directorys
 	 */
-	public static function create (string $path, int $mode = self::DEFAULT_MODE, bool $recursive = true) : bool
+	public function create($mode = self::DEFAULT_MODE, bool $recursive = true) : bool
 	{
-		$path = self::normalize($path);
+		$path = self::normalize($this->path);
 		
 		if (self::exists($path))
 			return true;
@@ -89,13 +88,13 @@ class Folder
      * @param string|null $type either 'file' or 'dir'. Null returns both files and directories
      * @return array Array of nested directories and files in each directory
      */
-    public static function tree (string $path, $exceptions = false, $type = null)
+    public function tree($exceptions = false, $type = null)
     {
-        if (!self::exists($path))
+        if (!self::exists($this->path))
 			return false;
 		
         $files = [];
-        $directories = [$path];
+        $directories = [$this->path];
 
         if (is_array($exceptions)) {
             $exceptions = array_flip($exceptions);
@@ -109,7 +108,7 @@ class Folder
         }
 
         try {
-            $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_PATHNAME | RecursiveDirectoryIterator::CURRENT_AS_SELF);
+            $directory = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::KEY_AS_PATHNAME | RecursiveDirectoryIterator::CURRENT_AS_SELF);
             $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
         } catch (Exception $e) {
             if ($type === null) {
@@ -156,57 +155,45 @@ class Folder
      * @param array $exceptions Array of files, directories to skip.
      * @return bool Success.
      */
-    public static function setChmod (string $path, 
-									 int $mode = self::DEFAULT_MODE, 
-									 bool $recursive = true, 
-									 array $exceptions = []
-									)
+    public function setChmod($mode = self::DEFAULT_MODE, bool $recursive = true, array $exceptions = [])
     {
-        if (!self::exists($path))
-		{
-			self::$errors[] = "[{$path}] - Não existe.";
+        if (!self::exists($this->path)){
+			$this->errors[] = "[{$this->path}] - Não existe.";
 			return false;
 		}
 		
-		if (!self::isValidChmod($mode))
-		{
-			self::$messages[] = sprintf('O valor %s, é inválido para chmod. O valor padrão %s, foi aplicado para o diretório %s.', $mode, self::DEFAULT_MODE, $path);
+		if (!self::isValidChmod($mode)){
+			$this->messages[] = sprintf('O valor %s, é inválido para chmod. O valor padrão %s, foi aplicado para o diretório %s.', $mode, self::DEFAULT_MODE, $this->path);
 		}
 
-        if ($recursive === false && is_dir($path)) 
-		{
+        if ($recursive === false && is_dir($this->path)) {
             //@codingStandardsIgnoreStart
-            if (@chmod($path, intval($mode, 8))) 
-			{
+            if (@chmod($this->path, intval($mode, 8))) {
                 //@codingStandardsIgnoreEnd
-                self::$messages[] = sprintf('%s alterado para %s', $path, $mode);
+                $this->messages[] = sprintf('%s alterado para %s', $this->path, $mode);
 
                 return true;
             }
-            self::$errors[] = sprintf('%s não alterado para %s', $path, $mode);
+            $this->errors[] = sprintf('%s não alterado para %s', $this->path, $mode);
             return false;
         }
 
-        if (is_dir($path)) 
-		{
-            $paths = self::tree($path);
+        if (is_dir($this->path)) {
+            $paths = self::tree($this->path);
 
-            foreach ($paths as $type) 
-			{
-                foreach ($type as $fullpath) 
-				{
+            foreach ($paths as $type) {
+                foreach ($type as $fullpath) {
                     $check = explode(DIRECTORY_SEPARATOR, $fullpath);
                     $count = count($check);
 
                     if (in_array($check[$count - 1], $exceptions)) 
                         continue;
-
                     //@codingStandardsIgnoreStart
                     if (@chmod($fullpath, intval($mode, 8))) 
                         //@codingStandardsIgnoreEnd
-                        self::$messages[] = sprintf('%s alterado para %s', $fullpath, $mode);
+                        $this->messages[] = sprintf('%s alterado para %s', $fullpath, $mode);
                     else 
-                        self::$errors[] = sprintf('%s não alterado para %s', $fullpath, $mode);
+                        $this->errors[] = sprintf('%s não alterado para %s', $fullpath, $mode);
                 }
             }
 
@@ -223,14 +210,12 @@ class Folder
      * @param string|null $path Path of directory to delete
      * @return bool Success
      */
-    public static function delete (string $path = null)
+    public function delete()
     {
-        if (!$path) 
-            return false;
 
-        if (is_dir($path)) {
+        if (is_dir($this->path)) {
             try {
-                $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::CURRENT_AS_SELF);
+                $directory = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::CURRENT_AS_SELF);
                 $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
             } catch (\Exception $e) {
                 return false;
@@ -242,29 +227,29 @@ class Folder
                     //@codingStandardsIgnoreStart
                     if (@unlink($filePath)) {
                         //@codingStandardsIgnoreEnd
-                        self::$messages[] = sprintf('%s removido.', $filePath);
+                        $this->messages[] = sprintf('%s removido.', $filePath);
                     } else {
-                        self::$errors[] = sprintf('%s não removido.', $filePath);
+                        $this->errors[] = sprintf('%s não removido.', $filePath);
                     }
                 } elseif ($item->isDir() && !$item->isDot()) {
                     //@codingStandardsIgnoreStart
                     if (@rmdir($filePath)) {
                         //@codingStandardsIgnoreEnd
-                        self::$messages[] = sprintf('%s removido.', $filePath);
+                        $this->messages[] = sprintf('%s removido.', $filePath);
                     } else {
-                        self::$errors[] = sprintf('%s não removido', $filePath);
+                        $this->errors[] = sprintf('%s não removido', $filePath);
                         return false;
                     }
                 }
             }
 
-            $path = rtrim($path, DIRECTORY_SEPARATOR);
+            $this->path = rtrim($this->path, DIRECTORY_SEPARATOR);
             //@codingStandardsIgnoreStart
-            if (@rmdir($path)) {
+            if (@rmdir($this->path)) {
                 //@codingStandardsIgnoreEnd
-                self::$messages[] = sprintf('%s removido', $path);
+                $this->messages[] = sprintf('%s removido', $this->path);
             } else {
-                self::$errors[] = sprintf('%s não removido', $path);
+                $this->errors[] = sprintf('%s não removido', $this->path);
                 return false;
             }
         }
@@ -280,10 +265,10 @@ class Folder
      * @param string|array $element Element to add at end of path
      * @return string Combined path
      */
-    public static function addPathElement($path, $element)
+    public function addPathElement($element)
     {
         $element = (array)$element;
-        array_unshift($element, rtrim($path, DIRECTORY_SEPARATOR));
+        array_unshift($element, rtrim($this->path, DIRECTORY_SEPARATOR));
         return implode(DIRECTORY_SEPARATOR, $element);
     }
 	
@@ -297,14 +282,14 @@ class Folder
     {
         return (preg_match('/^[A-Z]:\\\\/i', $path) || substr($path, 0, 2) === '\\\\');
     }
- 
-	
-	public static function isValidChmod (int $mode) : bool
-	{
-		if (filter_var($mode, FILTER_VALIDATE_INT, array('flags' => FILTER_FLAG_ALLOW_OCTAL)))
-			return true;
-		else
-			return false;
-	}
-	
+
+	public function hasErrors() : bool 
+    {
+        return (count($this->errors) > 1) ? true : false;
+    }
+    
+    public function getErrors() : array 
+    {
+        return $this->errors;
+    }
 }

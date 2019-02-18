@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 namespace laudirbispo\FileAndFolder;
-
 /**
  * Copyright (c) Laudir Bispo  (laudirbispo@outlook.com)
  *
@@ -9,7 +8,7 @@ namespace laudirbispo\FileAndFolder;
  * Redistributions of files must retain the above copyright notice.
  *
  * @copyright     (c) Laudir Bispo  (laudirbispo@outlook.com)
- * @since         1.0.0
+ * @since         2016
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
@@ -18,7 +17,7 @@ trait TraitFileAndFolder
 	/**
 	 * Normalize paths
 	 */
-	public static function normalize (string $path)
+	public static function normalize(string $path)
 	{
 		$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
@@ -36,7 +35,7 @@ trait TraitFileAndFolder
 		if (self::isAbsolute($path))
 			return $path;
 		else 
-        	return $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $path;	
+        	return $_SERVER['DOCUMENT_ROOT'] . $path;	
 	}
 	
 	/**
@@ -66,7 +65,7 @@ trait TraitFileAndFolder
 	/**
 	 * Slug name
 	 */
-	public static function slugify ($string) : string
+	public static function slugify($string) : string
 	{
 		if (!is_string($string))
 			return $string;
@@ -89,7 +88,7 @@ trait TraitFileAndFolder
 	 * @param string $bytes 
 	 * @return string
 	 */
-	public static function convertSizeToHumans ($bytes) 
+	public static function convertSizeToHumans($bytes) 
 	{
 		if (!is_int($bytes))
 			return 'null';
@@ -137,6 +136,14 @@ trait TraitFileAndFolder
 	public static function isValidNameLenght (strinf $filename) : bool
 	{
 		return (bool) (mb_strlen($filename,"UTF-8") > 225) ? true : false ;
+	}
+    
+    public static function isValidChmod($mode) : bool
+	{
+		if (filter_var($mode, FILTER_VALIDATE_INT, array('flags' => FILTER_FLAG_ALLOW_OCTAL)))
+			return true;
+		else
+			return false;
 	}
 	
 }
